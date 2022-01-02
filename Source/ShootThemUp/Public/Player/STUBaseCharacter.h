@@ -15,7 +15,11 @@ UCLASS() class SHOOTTHEMUP_API ASTUBaseCharacter : public ACharacter
 
 public:
     // Sets default values for this character's properties
-    ASTUBaseCharacter();
+    // для того чтобы поменять класс CharacterMovementComponent на USTUCharacterMovementComponent
+    // мы воспользуемся специальным видом конструктора с параметром
+    // в котором передаётся объект инициализации. Данный объект имеет вид
+    // FObjectInitializer:
+    ASTUBaseCharacter(const FObjectInitializer& ObjInit);
 
 protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
@@ -34,7 +38,17 @@ public:
     // Called to bind functionality to input
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+    // функция, которая возвращает, бежит ли персонаж (нужно для анимации бега
+    UFUNCTION(BlueprintCallable, Category = "Movement")
+    bool IsRunning() const;
+
 private:
+    bool WantsToRun = false;
+    bool IsMovingForward = false;
+
     void MoveForward(float Amount);
     void MoveRight(float Amount);
+
+    void OnStartRunning();
+    void OnStopRunning();
 };
