@@ -42,6 +42,10 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Movement")
     bool IsRunning() const;
 
+    // функция, которая будет возвращать значения угла для правильной обработки анимации движения в стороны
+    UFUNCTION(BlueprintCallable, Category = "Movement")
+    float GetMovementDirection() const;
+
 private:
     bool WantsToRun = false;
     bool IsMovingForward = false;
