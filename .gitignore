@@ -3,6 +3,7 @@
 
 # Standalone Builds
 Build/
+Builds/
 
 # Visual Studio 2015 database file
 *.VC.db
