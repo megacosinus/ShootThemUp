@@ -8,6 +8,8 @@
 #include "Components/STUHealthComponent.h"
 #include "Components/TextRenderComponent.h"
 
+DEFINE_LOG_CATEGORY_STATIC(BaseCharacterLog, All, All);
+
 // Sets default values
 // для того чтобы явно указать класс для CharacterMovementComponent
 // мы воспользуемся специальным видом конструктора с параметром
