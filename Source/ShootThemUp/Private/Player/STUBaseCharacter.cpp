@@ -41,16 +41,26 @@ void ASTUBaseCharacter::BeginPlay()
 
     check(HealthComponent);
     check(HealthTextComponent);
+    check(GetCharacterMovement());
+
+    // поскольку BaseCharacter запускается после модулей, то бродкаст с тем, что жизней 100 не прилетает сюда
+    // по этому в самом начале запросим количество жизней в явном виде:
+    OnHealthChanged(HealthComponent->GetHealth());
+    // подписываемся на делегат, извещающий о смерти персонажа
+    HealthComponent->OnDeath.AddUObject(this, &ASTUBaseCharacter::OnDeath);
+    // подписываемся на делегат, извещающий о изменении жизней (сделано в чтобы убрать опрос из Tick)
+    HealthComponent->OnHealthChanged.AddUObject(this, &ASTUBaseCharacter::OnHealthChanged);
+}
+
+void ASTUBaseCharacter::OnHealthChanged(float Health)
+{
+    HealthTextComponent->SetText(FText::FromString(FString::Printf(TEXT("%.0f"), Health)));
 }
 
 // Called every frame
 void ASTUBaseCharacter::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
-
-    //создаём локальную переменную и получаем в неё значение здоровья с помощью геттера в файле STUHealthComponent.h
-    const auto Health = HealthComponent->GetHealth();
-    HealthTextComponent->SetText(FText::FromString(FString::Printf(TEXT("%.0f"), Health)));
 }
 
 // Called to bind functionality to input
@@ -114,4 +124,18 @@ float ASTUBaseCharacter::GetMovementDirection() const
 
     // финальное значение (FMath::Sign возвращает знак от числа (+1/-1/0))
     return CrossProduct.IsZero() ? Degrees : Degrees * FMath::Sign(CrossProduct.Z);
+}
+
+void ASTUBaseCharacter::OnDeath()
+{
+    UE_LOG(BaseCharacterLog, Display, TEXT("Player %s is dead"), *GetName());
+
+    // проигрываем анимацию смерти. Проверка на валидность встроена в функцию, так что можно тут не делать.
+    PlayAnimMontage(DeathAnimMontage);
+
+    // после смерти запрещаем движение персонажа
+    GetCharacterMovement()->DisableMovement();
+
+    // уничтожаем персонажа через 5 секунд после смерти
+    SetLifeSpan(5.0f);
 }

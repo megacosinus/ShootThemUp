@@ -30,6 +30,12 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     bool DoFullDamage = false;
 
+    // выбираем тип повреждений, используем в UGameplayStatics::ApplyRadialDamage в С++ файле
+    // как я понял, так мы выбираем наследованные классы от UDamageType
+    // на текущий момент это STUIceDamageType и STUFireDamageType (не забываем вставлять U когда выбираем конкретный)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    TSubclassOf<UDamageType> DamageType;
+
 protected:
     // Called when the game starts or when spawned
     virtual void BeginPlay() override;

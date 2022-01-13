@@ -6,8 +6,12 @@
 #include "Components/ActorComponent.h"
 #include "STUHealthComponent.generated.h"
 
-UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
-class SHOOTTHEMUP_API USTUHealthComponent : public UActorComponent
+//Объявляем делегат о том, умер ли наш персонаж (будет доступен только в С++)
+DECLARE_MULTICAST_DELEGATE(FOnDeath)
+
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnHealthChanged, float)
+
+    UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent)) class SHOOTTHEMUP_API USTUHealthComponent : public UActorComponent
 {
     GENERATED_BODY()
 
@@ -16,6 +20,13 @@ public:
     USTUHealthComponent();
 
     float GetHealth() const { return Health; }
+
+    UFUNCTION(BlueprintCallable)
+    bool IsDead() const { return Health <= 0.0f; }
+
+    // делегат о том что наш персонаж умер
+    FOnDeath OnDeath;
+    FOnHealthChanged OnHealthChanged;
 
 protected:
     // Called when the game starts

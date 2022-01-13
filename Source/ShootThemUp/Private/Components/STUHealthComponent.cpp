@@ -21,6 +21,8 @@ void USTUHealthComponent::BeginPlay()
     Super::BeginPlay();
 
     Health = MaxHealth;
+    //поскольку тут присваиваем жизни, то нужно об этом объ€вить, потому броадкастим:
+    OnHealthChanged.Broadcast(Health);
 
     // подпишемс€ на получение урона:
     AActor* ComponentOwner = GetOwner();
@@ -32,7 +34,15 @@ void USTUHealthComponent::BeginPlay()
 
 void USTUHealthComponent::OnTakeAnyDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser)
 {
-    Health -= Damage;
+    if (Damage <= 0.0f || IsDead())
+        return;
 
-    UE_LOG(LogHealthComponent, Display, TEXT("Damage: %f"), Damage);
+    Health = FMath::Clamp(Health - Damage, 0.0f, MaxHealth);
+    OnHealthChanged.Broadcast(Health);
+
+    // если умер, то бродкастим делегат
+    if (IsDead())
+    {
+        OnDeath.Broadcast();
+    }
 }
