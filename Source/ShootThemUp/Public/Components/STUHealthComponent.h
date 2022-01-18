@@ -21,8 +21,9 @@ public:
 
     float GetHealth() const { return Health; }
 
+    // ниже используется FMath::IsNearlyZero из-за того что числа с плавающей запятой могут не быть равны 0
     UFUNCTION(BlueprintCallable)
-    bool IsDead() const { return Health <= 0.0f; }
+    bool IsDead() const { return FMath::IsNearlyZero(Health); }
 
     // делегат о том что наш персонаж умер
     FOnDeath OnDeath;
@@ -35,10 +36,28 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Health", meta = (ClampMin = "0", ClampMax = "1000.0"))
     float MaxHealth = 100.0f;
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Heal")
+    bool AutoHeal = true;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Heal", meta = (EditCondition = "AutoHeal"))
+    float HealUpdateTime = 1.0f;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Heal", meta = (EditCondition = "AutoHeal"))
+    float HealDelay = 3.0f;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Heal", meta = (EditCondition = "AutoHeal"))
+    float HealModifier = 5.0f;
+
 private:
     float Health = 0.0f;
+
+    // таймер для автохила:
+    FTimerHandle HealTimerHandle;
 
     // функция для обработки Damage
     UFUNCTION()
     void OnTakeAnyDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
+
+    void HealUpdate();
+    void SetHealth(float NewHealth);
 };

@@ -7,6 +7,7 @@
 #include "Components/STUCharacterMovementComponent.h"
 #include "Components/STUHealthComponent.h"
 #include "Components/TextRenderComponent.h"
+#include "GameFramework/Controller.h"
 
 DEFINE_LOG_CATEGORY_STATIC(BaseCharacterLog, All, All);
 
@@ -50,6 +51,9 @@ void ASTUBaseCharacter::BeginPlay()
     HealthComponent->OnDeath.AddUObject(this, &ASTUBaseCharacter::OnDeath);
     // подписываемся на делегат, извещающий о изменении жизней (сделано в чтобы убрать опрос из Tick)
     HealthComponent->OnHealthChanged.AddUObject(this, &ASTUBaseCharacter::OnHealthChanged);
+
+    // подписываемся на делегат приземления, чтобы отрабатывать повреждения падения с высоты:
+    LandedDelegate.AddDynamic(this, &ASTUBaseCharacter::OnGroundLanded);
 }
 
 void ASTUBaseCharacter::OnHealthChanged(float Health)
@@ -138,4 +142,24 @@ void ASTUBaseCharacter::OnDeath()
 
     // уничтожаем персонажа через 5 секунд после смерти
     SetLifeSpan(5.0f);
+
+    // переводим контроллер в режим спектатора
+    if (Controller)
+    {
+        Controller->ChangeState(NAME_Spectating);
+    }
+}
+
+void ASTUBaseCharacter::OnGroundLanded(const FHitResult& Hit)
+{
+    // с минусом, потому что при падении координата Z отрицательная
+    const auto FallVelocityZ = -GetCharacterMovement()->Velocity.Z;
+    UE_LOG(BaseCharacterLog, Display, TEXT("On landed: %f"), FallVelocityZ);
+
+    if (FallVelocityZ < LandedDamageVelocity.X)
+        return;
+
+    const auto FinalDamage = FMath::GetMappedRangeValueClamped(LandedDamageVelocity, LandedDamage, FallVelocityZ);
+    UE_LOG(BaseCharacterLog, Display, TEXT("FinalDamage: %f"), FinalDamage);
+    TakeDamage(FinalDamage, FDamageEvent{}, nullptr, nullptr);
 }
