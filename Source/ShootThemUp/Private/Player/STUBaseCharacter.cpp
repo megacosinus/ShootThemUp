@@ -26,6 +26,7 @@ ASTUBaseCharacter::ASTUBaseCharacter(const FObjectInitializer& ObjInit) : Super(
     SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>("SpringArmComponent");
     SpringArmComponent->SetupAttachment(GetRootComponent());
     SpringArmComponent->bUsePawnControlRotation = true; //вращаем и игроком при вращении штатива
+    SpringArmComponent->SocketOffset = FVector(0.0f, 100.0f, 80.0f);
 
     CameraComponent = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
     CameraComponent->SetupAttachment(SpringArmComponent);
@@ -34,6 +35,7 @@ ASTUBaseCharacter::ASTUBaseCharacter(const FObjectInitializer& ObjInit) : Super(
 
     HealthTextComponent = CreateDefaultSubobject<UTextRenderComponent>("HealthTextComponent");
     HealthTextComponent->SetupAttachment(GetRootComponent());
+    HealthTextComponent->SetOwnerNoSee(true);
 }
 
 // Called when the game starts or when spawned
@@ -171,6 +173,8 @@ void ASTUBaseCharacter::SpawnWeapon()
 {
     if (!GetWorld())
         return;
+
+    // GetWorld()->SpawnActor возвращает указатель, по этому сразу создаём переменную с ним
     const auto Weapon = GetWorld()->SpawnActor<ASTUBaseWeapon>(WeaponClass);
     if (Weapon)
     {
