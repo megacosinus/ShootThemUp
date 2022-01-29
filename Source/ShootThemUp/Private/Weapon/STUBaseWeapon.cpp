@@ -30,8 +30,6 @@ void ASTUBaseWeapon::BeginPlay()
 
 void ASTUBaseWeapon::Fire()
 {
-    UE_LOG(LogBaseWeapon, Display, TEXT("Fire!"));
-
     MakeShot();
 }
 
@@ -66,13 +64,31 @@ void ASTUBaseWeapon::MakeShot()
 
     if (HitResult.bBlockingHit) // если было пересечение:
     {
+        MakeDamage(HitResult);
         DrawDebugLine(GetWorld(), SocketTransform.GetLocation(), HitResult.ImpactPoint, FColor::Red, false, 3.0f, 0, 3.0f);
         DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 10.0f, 24, FColor::Red, false, 5.0f);
-        
-        UE_LOG(LogBaseWeapon, Display, TEXT("Bone: %s"), *HitResult.BoneName.ToString()); // можем увидеть в какую часть модели попал снаряд
     }
     else
     {
         DrawDebugLine(GetWorld(), SocketTransform.GetLocation(), TraceEnd, FColor::Red, false, 3.0f, 0, 3.0f);
     }
+}
+
+void ASTUBaseWeapon::MakeDamage(const FHitResult& HitResult)
+{
+    const auto DamagedActor = HitResult.GetActor();
+    if (!DamagedActor)
+        return;
+
+    // надо бы в отдельную функцию вынести, т.к. повторяется
+    const auto Player = Cast<ACharacter>(GetOwner());
+    if (!Player)
+        return;
+
+    const auto Controller = Player->GetController<APlayerController>();
+    if (!Controller)
+        return;
+    //
+
+    DamagedActor->TakeDamage(DamageAmount, FDamageEvent(), Controller, this);
 }
