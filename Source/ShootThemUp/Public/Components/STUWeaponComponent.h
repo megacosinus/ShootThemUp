@@ -16,7 +16,8 @@ public:
     // Sets default values for this component's properties
     USTUWeaponComponent();
 
-    void Fire();
+    void StartFire();
+    void StopFire();
 
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")

@@ -17,7 +17,8 @@ public:
     // Sets default values for this actor's properties
     ASTUBaseWeapon();
 
-    virtual void Fire();
+    virtual void StartFire();
+    virtual void StopFire();
 
 protected:
     // Called when the game starts or when spawned
@@ -37,6 +38,7 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
     float DamageAmount = 10.0f;
 
-    void MakeShot();
+    virtual void MakeShot();
+
     void MakeDamage(const FHitResult& HitResult);
 };

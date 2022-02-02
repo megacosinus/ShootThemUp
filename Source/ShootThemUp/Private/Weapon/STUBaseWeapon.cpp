@@ -28,51 +28,12 @@ void ASTUBaseWeapon::BeginPlay()
     check(WeaponMesh);
 }
 
-void ASTUBaseWeapon::Fire()
-{
-    MakeShot();
-}
+//ниже три функции чисто интерфейсные и задаются в конкретном оружии
+void ASTUBaseWeapon::StartFire() {}
 
-void ASTUBaseWeapon::MakeShot()
-{
-    if (!GetWorld())
-        return;
+void ASTUBaseWeapon::StopFire() {}
 
-    const auto Player = Cast<ACharacter>(GetOwner());
-    if (!Player)
-        return;
-
-    const auto Controller = Player->GetController<APlayerController>();
-    if (!Controller)
-        return;
-
-    FVector ViewLocation;
-    FRotator ViewRotation;
-    Controller->GetPlayerViewPoint(ViewLocation, ViewRotation);
-
-    const FTransform SocketTransform = WeaponMesh->GetSocketTransform(MuzzleSocketName);
-
-    const FVector TraceStart = ViewLocation;              // SocketTransform.GetLocation();                        // сюда запишем положение сокета
-    const FVector ShootDirection = ViewRotation.Vector(); // SocketTransform.GetRotation().GetForwardVector(); // сюда - направление полёта пули
-    const FVector TraceEnd = TraceStart + ShootDirection * TraceMaxDistance;
-
-    // получаем информацию о первом объекте, который нам встретится на линии полёта пули
-    FCollisionQueryParams CollisionParams;
-    CollisionParams.AddIgnoredActor(GetOwner()); // при расчёте коллизий игнорируем игрока
-    FHitResult HitResult;                        // так же эта функция возвращает bool о том, было ли пересечение
-    GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Visibility, CollisionParams);
-
-    if (HitResult.bBlockingHit) // если было пересечение:
-    {
-        MakeDamage(HitResult);
-        DrawDebugLine(GetWorld(), SocketTransform.GetLocation(), HitResult.ImpactPoint, FColor::Red, false, 3.0f, 0, 3.0f);
-        DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 10.0f, 24, FColor::Red, false, 5.0f);
-    }
-    else
-    {
-        DrawDebugLine(GetWorld(), SocketTransform.GetLocation(), TraceEnd, FColor::Red, false, 3.0f, 0, 3.0f);
-    }
-}
+void ASTUBaseWeapon::MakeShot() {}
 
 void ASTUBaseWeapon::MakeDamage(const FHitResult& HitResult)
 {
