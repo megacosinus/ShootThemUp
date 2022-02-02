@@ -18,21 +18,37 @@ public:
 
     void StartFire();
     void StopFire();
+    void NextWeapon();
 
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-    TSubclassOf<ASTUBaseWeapon> WeaponClass;
+    TArray<TSubclassOf<ASTUBaseWeapon>> WeaponClasses;
 
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-    FName WeaponAttachPointName = "WeaponSocket";
+    FName WeaponEquipSocketName = "WeaponSocket";
+
+    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+    FName WeaponArmorySocketName = "ArmorySocket";
 
     // Called when the game starts
     virtual void BeginPlay() override;
+
+    // Тут мы убираем убираем оружие и прекращаем стрельбу при смерте персонажа
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
     // делаем глобальную переменную с текущим оружием, ставим пока пустой, в cpp файле, в SpawnWeapon(), ей присвоится оружие
     UPROPERTY()
     ASTUBaseWeapon* CurrentWeapon = nullptr;
 
-    void SpawnWeapon();
+    // массив с оружием
+    UPROPERTY()
+    TArray<ASTUBaseWeapon*> Weapons;
+
+    // индекс текущего оружия
+    int32 CurrentWeaponIndex = 0;
+
+    void SpawnWeapons();
+    void AttachWeaponToSocket(ASTUBaseWeapon* Weapon, USceneComponent* SceneComponent, const FName& SocketName);
+    void EquipWeapon(int32 WeaponIndex);
 };

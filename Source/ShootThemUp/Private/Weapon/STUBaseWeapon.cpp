@@ -34,22 +34,3 @@ void ASTUBaseWeapon::StartFire() {}
 void ASTUBaseWeapon::StopFire() {}
 
 void ASTUBaseWeapon::MakeShot() {}
-
-void ASTUBaseWeapon::MakeDamage(const FHitResult& HitResult)
-{
-    const auto DamagedActor = HitResult.GetActor();
-    if (!DamagedActor)
-        return;
-
-    // надо бы в отдельную функцию вынести, т.к. повторяется
-    const auto Player = Cast<ACharacter>(GetOwner());
-    if (!Player)
-        return;
-
-    const auto Controller = Player->GetController<APlayerController>();
-    if (!Controller)
-        return;
-    //
-
-    DamagedActor->TakeDamage(DamageAmount, FDamageEvent(), Controller, this);
-}

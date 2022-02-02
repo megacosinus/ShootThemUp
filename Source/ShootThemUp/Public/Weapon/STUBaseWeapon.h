@@ -28,17 +28,12 @@ protected:
     USkeletalMeshComponent* WeaponMesh;
 
     // переменная для указания названия сокета из которого будут вылетать пули (сокет находится на меше оружия)
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
     FName MuzzleSocketName = "MuzzleSocket";
 
     // дистанция выстрела
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
     float TraceMaxDistance = 1500.0f;
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-    float DamageAmount = 10.0f;
-
     virtual void MakeShot();
-
-    void MakeDamage(const FHitResult& HitResult);
 };
