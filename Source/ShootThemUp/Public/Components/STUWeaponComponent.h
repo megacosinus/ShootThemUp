@@ -7,8 +7,21 @@
 #include "STUWeaponComponent.generated.h"
 
 class ASTUBaseWeapon;
-UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
-class SHOOTTHEMUP_API USTUWeaponComponent : public UActorComponent
+
+// тут мы будем хранить класс оружия и анимацию перезарядки для данного оружия
+USTRUCT(BlueprintType)
+struct FWeaponData
+{
+    GENERATED_USTRUCT_BODY()
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
+    TSubclassOf<ASTUBaseWeapon> WeaponClass;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
+    UAnimMontage* ReloadAnimMontage;
+};
+
+UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent)) class SHOOTTHEMUP_API USTUWeaponComponent : public UActorComponent
 {
     GENERATED_BODY()
 
@@ -19,10 +32,11 @@ public:
     void StartFire();
     void StopFire();
     void NextWeapon();
+    void Reload();
 
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-    TArray<TSubclassOf<ASTUBaseWeapon>> WeaponClasses;
+    TArray<FWeaponData> WeaponData;
 
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
     FName WeaponEquipSocketName = "WeaponSocket";
@@ -47,6 +61,9 @@ private:
     // массив с оружием
     UPROPERTY()
     TArray<ASTUBaseWeapon*> Weapons;
+
+    UPROPERTY()
+    UAnimMontage* CurrentReloadAnimMontage = nullptr;
 
     // индекс текущего оружия
     int32 CurrentWeaponIndex = 0;

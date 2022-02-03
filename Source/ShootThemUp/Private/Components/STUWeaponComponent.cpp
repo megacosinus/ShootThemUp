@@ -49,10 +49,10 @@ void USTUWeaponComponent::SpawnWeapons()
     if (!Character || !GetWorld())
         return;
 
-    for (auto WeaponClass : WeaponClasses)
+    for (auto OneWeaponData : WeaponData)
     {
         // GetWorld()->SpawnActor возвращает указатель, по этому сразу создаём переменную с ним
-        auto Weapon = GetWorld()->SpawnActor<ASTUBaseWeapon>(WeaponClass);
+        auto Weapon = GetWorld()->SpawnActor<ASTUBaseWeapon>(OneWeaponData.WeaponClass);
         if (!Weapon)
             continue;
         Weapon->SetOwner(Character);
@@ -72,6 +72,12 @@ void USTUWeaponComponent::AttachWeaponToSocket(ASTUBaseWeapon* Weapon, USceneCom
 
 void USTUWeaponComponent::EquipWeapon(int32 WeaponIndex)
 {
+    if (WeaponIndex < 0 || WeaponIndex >= Weapons.Num())
+    {
+        UE_LOG(LogWeaponComponent, Warning, TEXT("Invalid weapon index"));
+        return;
+    }
+
     ACharacter* Character = Cast<ACharacter>(GetOwner()); // нужно чтобы приаттачить оружие к персонажу
     if (!Character)
         return;
@@ -85,6 +91,12 @@ void USTUWeaponComponent::EquipWeapon(int32 WeaponIndex)
 
     // берём новую пушку в руки
     CurrentWeapon = Weapons[WeaponIndex];
+    //меняем анимацию перезарядки:
+    // CurrentReloadAnimMontage = WeaponData[WeaponIndex].ReloadAnimMontage;
+    const auto CurrentWeaponData = WeaponData.FindByPredicate([&](const FWeaponData& Data) { return Data.WeaponClass == CurrentWeapon->GetClass(); }); // Предикат - это функциональный объект, который
+                                                                                                                                                       // возвращает истинну или ложь Лекция 62, 5:40
+    CurrentReloadAnimMontage = CurrentWeaponData ? CurrentWeaponData->ReloadAnimMontage : nullptr;
+
     AttachWeaponToSocket(CurrentWeapon, Character->GetMesh(), WeaponEquipSocketName);
     EquipAnimInProgress = true;
     PlayAnimMontage(EquipAnimMontage); // переход в функцию анимации смены оружия
@@ -164,4 +176,9 @@ bool USTUWeaponComponent::CanFire() const
 bool USTUWeaponComponent::CanEquip() const
 {
     return !EquipAnimInProgress;
+}
+
+void USTUWeaponComponent::Reload()
+{
+    PlayAnimMontage(CurrentReloadAnimMontage);
 }
