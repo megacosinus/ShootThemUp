@@ -8,6 +8,22 @@
 
 class USkeletalMeshComponent;
 
+// структура для патронов
+USTRUCT(BlueprintType)
+struct FAmmoData
+{
+    GENERATED_USTRUCT_BODY()
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
+    int32 Bullets;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon", meta = (EditCondition = "!Infinite"))
+    int32 Clips;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
+    bool Infinite; // конечен ли арсенал
+};
+
 UCLASS()
 class SHOOTTHEMUP_API ASTUBaseWeapon : public AActor
 {
@@ -28,12 +44,25 @@ protected:
     USkeletalMeshComponent* WeaponMesh;
 
     // переменная для указания названия сокета из которого будут вылетать пули (сокет находится на меше оружия)
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
     FName MuzzleSocketName = "MuzzleSocket";
 
     // дистанция выстрела
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
     float TraceMaxDistance = 1500.0f;
 
+    // создаём структуру с патронами (она в начале этого файла)
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
+    FAmmoData DefaultAmmo{15, 10, false}; // начальный арсенал оружия
+
     virtual void MakeShot();
+
+    void DecreaseAmmo(); // функция, которая будет уменьшать количество патронов
+    bool IsAmmoEmpty() const;
+    bool IsClipEmpty() const;
+    void ChangeClip();
+    void LogAmmo();
+
+private:
+    FAmmoData CurrentAmmo; // текущий арсенал оружия
 };

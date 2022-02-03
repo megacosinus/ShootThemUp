@@ -30,6 +30,9 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
     FName WeaponArmorySocketName = "ArmorySocket";
 
+    UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+    UAnimMontage* EquipAnimMontage;
+
     // Called when the game starts
     virtual void BeginPlay() override;
 
@@ -48,7 +51,17 @@ private:
     // индекс текущего оружия
     int32 CurrentWeaponIndex = 0;
 
+    bool EquipAnimInProgress = false;
+
     void SpawnWeapons();
     void AttachWeaponToSocket(ASTUBaseWeapon* Weapon, USceneComponent* SceneComponent, const FName& SocketName);
     void EquipWeapon(int32 WeaponIndex);
+
+    void PlayAnimMontage(UAnimMontage* Animation);
+
+    void InitAnimations(); // находим и подписываемся на AnimNotify (нужно чтобы знать, когда закончилась анимация смены пушки)
+    void OnEquipFinished(USkeletalMeshComponent* MeshComponent); // колбэк для делегата AnimNotify
+
+    bool CanFire() const;
+    bool CanEquip() const;
 };

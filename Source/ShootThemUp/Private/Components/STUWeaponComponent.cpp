@@ -2,7 +2,10 @@
 
 #include "Components/STUWeaponComponent.h"
 #include "Weapon/STUBaseWeapon.h"
-#include "GameFramework/Character.h" // нужен чтобы приаттачить оружие к персонажу
+#include "GameFramework/Character.h"               // нужен чтобы приаттачить оружие к персонажу
+#include "Animations/STUEquipFinishedAnimNotify.h" // нотифай об окончании анимации смены оружия
+
+DEFINE_LOG_CATEGORY_STATIC(LogWeaponComponent, All, All);
 
 // Sets default values for this component's properties
 USTUWeaponComponent::USTUWeaponComponent()
@@ -20,7 +23,7 @@ void USTUWeaponComponent::BeginPlay()
     Super::BeginPlay();
 
     CurrentWeaponIndex = 0;
-
+    InitAnimations();
     SpawnWeapons();
     EquipWeapon(CurrentWeaponIndex);
 }
@@ -83,11 +86,13 @@ void USTUWeaponComponent::EquipWeapon(int32 WeaponIndex)
     // берём новую пушку в руки
     CurrentWeapon = Weapons[WeaponIndex];
     AttachWeaponToSocket(CurrentWeapon, Character->GetMesh(), WeaponEquipSocketName);
+    EquipAnimInProgress = true;
+    PlayAnimMontage(EquipAnimMontage); // переход в функцию анимации смены оружия
 }
 
 void USTUWeaponComponent::StartFire()
 {
-    if (!CurrentWeapon)
+    if (!CanFire())
         return;
 
     CurrentWeapon->StartFire();
@@ -103,6 +108,60 @@ void USTUWeaponComponent::StopFire()
 
 void USTUWeaponComponent::NextWeapon()
 {
+    if (!CanEquip())
+        return;
+
     CurrentWeaponIndex = (CurrentWeaponIndex + 1) % Weapons.Num(); // берём по модулю длинны массива
     EquipWeapon(CurrentWeaponIndex);
+}
+
+void USTUWeaponComponent::PlayAnimMontage(UAnimMontage* Animation)
+{
+    ACharacter* Character = Cast<ACharacter>(GetOwner());
+    if (!Character)
+        return;
+
+    Character->PlayAnimMontage(Animation); // на null проверять не нужно, т.к. в теле функции PlayAnimMontage эта проверка уже есть
+}
+
+void USTUWeaponComponent::InitAnimations()
+{
+    if (!EquipAnimMontage)
+        return;
+    // берём массив анимационных ивентов:
+    const auto NotifyEvents = EquipAnimMontage->Notifies;
+    for (auto NotifyEvent : NotifyEvents)
+    {
+        // чтобы узнать, является ли данный нотифай нашим нотифаем EquipFinished
+        // мы попытаемся преобразовать данный нотифай к нашему типу:
+        auto EquipFinishedNotify = Cast<USTUEquipFinishedAnimNotify>(NotifyEvent.Notify);
+        // если преобразование прошло успешно, то именно этот нотифай нам и нужен
+        if (EquipFinishedNotify)
+        {
+            // достаём наш делегат
+            EquipFinishedNotify->OnNotified.AddUObject(this, &USTUWeaponComponent::OnEquipFinished);
+            // выходим из цикла:
+            break;
+        }
+    }
+}
+
+void USTUWeaponComponent::OnEquipFinished(USkeletalMeshComponent* MeshComponent)
+{
+    ACharacter* Character = Cast<ACharacter>(GetOwner());
+    if (!Character || Character->GetMesh() != MeshComponent) // Сравниваем меш, который прилетел в нотифае с текущим мешем и если не совпадают, то выходим
+        return;
+
+    EquipAnimInProgress = false;
+}
+
+bool USTUWeaponComponent::CanFire() const
+{
+    // указатель должен быть ненулевым и не должно быть анимации
+    return CurrentWeapon && !EquipAnimInProgress;
+}
+
+bool USTUWeaponComponent::CanEquip() const
+{
+    return !EquipAnimInProgress;
 }

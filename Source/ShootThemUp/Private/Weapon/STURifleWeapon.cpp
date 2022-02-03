@@ -19,16 +19,26 @@ void ASTURifleWeapon::StopFire()
 
 void ASTURifleWeapon::MakeShot()
 {
-    if (!GetWorld())
+
+    if (!GetWorld() || IsAmmoEmpty())
+    {
+        StopFire();
         return;
+    }
 
     const auto Player = Cast<ACharacter>(GetOwner());
     if (!Player)
+    {
+        StopFire();
         return;
+    }
 
     const auto Controller = Player->GetController<APlayerController>();
     if (!Controller)
+    {
+        StopFire();
         return;
+    }
 
     FVector ViewLocation;
     FRotator ViewRotation;
@@ -57,6 +67,8 @@ void ASTURifleWeapon::MakeShot()
     {
         DrawDebugLine(GetWorld(), SocketTransform.GetLocation(), TraceEnd, FColor::Red, false, 3.0f, 0, 3.0f);
     }
+
+    DecreaseAmmo();
 }
 
 void ASTURifleWeapon::MakeDamage(const FHitResult& HitResult)
