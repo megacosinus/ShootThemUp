@@ -6,6 +6,9 @@
 #include "GameFramework/Actor.h"
 #include "STUBaseWeapon.generated.h"
 
+//делегат, который будет оповещать WeaponComponent о том, что у нас закончились патроны:
+DECLARE_MULTICAST_DELEGATE(FOnClipEmptySignature);
+
 class USkeletalMeshComponent;
 
 // структура для патронов
@@ -33,8 +36,13 @@ public:
     // Sets default values for this actor's properties
     ASTUBaseWeapon();
 
+    FOnClipEmptySignature OnClipEmpty;
+
     virtual void StartFire();
     virtual void StopFire();
+
+    void ChangeClip();
+    bool CanReload() const; // определяет, может ли данное оружие делать перезарядку впринципе
 
 protected:
     // Called when the game starts or when spawned
@@ -60,7 +68,6 @@ protected:
     void DecreaseAmmo(); // функция, которая будет уменьшать количество патронов
     bool IsAmmoEmpty() const;
     bool IsClipEmpty() const;
-    void ChangeClip();
     void LogAmmo();
 
 private:

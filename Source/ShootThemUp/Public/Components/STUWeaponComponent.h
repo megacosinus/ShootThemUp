@@ -85,6 +85,10 @@ private:
     bool CanEquip() const;
     bool CanReload() const;
 
+    // колбэк на делегат OnEmptyClip (из STUBaseWeapon)
+    void OnEmptyClip();
+    void ChangeClip();
+
     // Шаблонная функция (вообще, название немного некорректное, т.к. она достаёт только первый нотифай):
     template <typename T> T* FindNotifyByClass(UAnimSequenceBase* Animation)
     {

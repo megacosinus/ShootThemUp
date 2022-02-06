@@ -56,6 +56,7 @@ void USTUWeaponComponent::SpawnWeapons()
         auto Weapon = GetWorld()->SpawnActor<ASTUBaseWeapon>(OneWeaponData.WeaponClass);
         if (!Weapon)
             continue;
+        Weapon->OnClipEmpty.AddUObject(this, &USTUWeaponComponent::OnEmptyClip); // подписались на делегат
         Weapon->SetOwner(Character);
         Weapons.Add(Weapon);
 
@@ -188,13 +189,28 @@ bool USTUWeaponComponent::CanEquip() const
 bool USTUWeaponComponent::CanReload() const
 {
     // указатель должен быть ненулевым и не должно быть анимации
-    return CurrentWeapon && !EquipAnimInProgress && !ReloadAnimInProgress;
+    return CurrentWeapon            //
+           && !EquipAnimInProgress  //
+           && !ReloadAnimInProgress //
+           && CurrentWeapon->CanReload();
 }
 
 void USTUWeaponComponent::Reload()
 {
+    ChangeClip();
+}
+
+void USTUWeaponComponent::OnEmptyClip()
+{
+    ChangeClip();
+}
+
+void USTUWeaponComponent::ChangeClip()
+{
     if (!CanReload())
         return;
+    CurrentWeapon->StopFire();
+    CurrentWeapon->ChangeClip();
     ReloadAnimInProgress = true;
     PlayAnimMontage(CurrentReloadAnimMontage);
 }

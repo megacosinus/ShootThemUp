@@ -39,12 +39,20 @@ void ASTUBaseWeapon::MakeShot() {}
 
 void ASTUBaseWeapon::DecreaseAmmo()
 {
+    if (CurrentAmmo.Bullets == 0)
+    {
+        UE_LOG(LogBaseWeapon, Warning, TEXT("Clip is empty!"));
+        return;
+    }
+
     CurrentAmmo.Bullets--;
     LogAmmo();
 
     if (IsClipEmpty() && !IsAmmoEmpty())
     {
-        ChangeClip();
+        StopFire();
+        // вызываем делегата
+        OnClipEmpty.Broadcast();
     }
 }
 
@@ -60,12 +68,22 @@ bool ASTUBaseWeapon::IsClipEmpty() const
 
 void ASTUBaseWeapon::ChangeClip()
 {
-    CurrentAmmo.Bullets = DefaultAmmo.Bullets;
     if (!CurrentAmmo.Infinite)
     {
+        if (CurrentAmmo.Clips == 0)
+        {
+            UE_LOG(LogBaseWeapon, Warning, TEXT("No more clips"));
+            return;
+        }
         CurrentAmmo.Clips--;
     }
+    CurrentAmmo.Bullets = DefaultAmmo.Bullets;
     UE_LOG(LogBaseWeapon, Display, TEXT("------ Change Clip ------"));
+}
+
+bool ASTUBaseWeapon::CanReload() const
+{
+    return CurrentAmmo.Bullets < DefaultAmmo.Bullets && CurrentAmmo.Clips > 0;
 }
 
 void ASTUBaseWeapon::LogAmmo()
