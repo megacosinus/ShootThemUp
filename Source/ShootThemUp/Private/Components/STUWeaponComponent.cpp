@@ -2,8 +2,9 @@
 
 #include "Components/STUWeaponComponent.h"
 #include "Weapon/STUBaseWeapon.h"
-#include "GameFramework/Character.h"               // нужен чтобы приаттачить оружие к персонажу
-#include "Animations/STUEquipFinishedAnimNotify.h" // нотифай об окончании анимации смены оружия
+#include "GameFramework/Character.h"                // нужен чтобы приаттачить оружие к персонажу
+#include "Animations/STUEquipFinishedAnimNotify.h"  // нотифай об окончании анимации смены оружия
+#include "Animations/STUReloadFinishedAnimNotify.h" // ну ты понял
 
 DEFINE_LOG_CATEGORY_STATIC(LogWeaponComponent, All, All);
 
@@ -138,23 +139,20 @@ void USTUWeaponComponent::PlayAnimMontage(UAnimMontage* Animation)
 
 void USTUWeaponComponent::InitAnimations()
 {
-    if (!EquipAnimMontage)
-        return;
-    // берём массив анимационных ивентов:
-    const auto NotifyEvents = EquipAnimMontage->Notifies;
-    for (auto NotifyEvent : NotifyEvents)
+    auto EquipFinishedNotify = FindNotifyByClass<USTUEquipFinishedAnimNotify>(EquipAnimMontage);
+    if (EquipFinishedNotify)
     {
-        // чтобы узнать, является ли данный нотифай нашим нотифаем EquipFinished
-        // мы попытаемся преобразовать данный нотифай к нашему типу:
-        auto EquipFinishedNotify = Cast<USTUEquipFinishedAnimNotify>(NotifyEvent.Notify);
-        // если преобразование прошло успешно, то именно этот нотифай нам и нужен
-        if (EquipFinishedNotify)
-        {
-            // достаём наш делегат
-            EquipFinishedNotify->OnNotified.AddUObject(this, &USTUWeaponComponent::OnEquipFinished);
-            // выходим из цикла:
-            break;
-        }
+        // достаём наш делегат
+        EquipFinishedNotify->OnNotified.AddUObject(this, &USTUWeaponComponent::OnEquipFinished);
+    }
+
+    for (auto OneWeaponData : WeaponData)
+    {
+        auto ReloadFinishedNotify = FindNotifyByClass<USTUReloadFinishedAnimNotify>(OneWeaponData.ReloadAnimMontage);
+        if (!ReloadFinishedNotify)
+            continue;
+        // достаём наш делегат
+        ReloadFinishedNotify->OnNotified.AddUObject(this, &USTUWeaponComponent::OnReloadFinished);
     }
 }
 
@@ -167,18 +165,36 @@ void USTUWeaponComponent::OnEquipFinished(USkeletalMeshComponent* MeshComponent)
     EquipAnimInProgress = false;
 }
 
+void USTUWeaponComponent::OnReloadFinished(USkeletalMeshComponent* MeshComponent)
+{
+    ACharacter* Character = Cast<ACharacter>(GetOwner());
+    if (!Character || Character->GetMesh() != MeshComponent) // Сравниваем меш, который прилетел в нотифае с текущим мешем и если не совпадают, то выходим
+        return;
+
+    ReloadAnimInProgress = false;
+}
+
 bool USTUWeaponComponent::CanFire() const
 {
     // указатель должен быть ненулевым и не должно быть анимации
-    return CurrentWeapon && !EquipAnimInProgress;
+    return CurrentWeapon && !EquipAnimInProgress && !ReloadAnimInProgress;
 }
 
 bool USTUWeaponComponent::CanEquip() const
 {
-    return !EquipAnimInProgress;
+    return !EquipAnimInProgress && !ReloadAnimInProgress;
+}
+
+bool USTUWeaponComponent::CanReload() const
+{
+    // указатель должен быть ненулевым и не должно быть анимации
+    return CurrentWeapon && !EquipAnimInProgress && !ReloadAnimInProgress;
 }
 
 void USTUWeaponComponent::Reload()
 {
+    if (!CanReload())
+        return;
+    ReloadAnimInProgress = true;
     PlayAnimMontage(CurrentReloadAnimMontage);
 }

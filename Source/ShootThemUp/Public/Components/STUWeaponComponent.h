@@ -69,6 +69,7 @@ private:
     int32 CurrentWeaponIndex = 0;
 
     bool EquipAnimInProgress = false;
+    bool ReloadAnimInProgress = false;
 
     void SpawnWeapons();
     void AttachWeaponToSocket(ASTUBaseWeapon* Weapon, USceneComponent* SceneComponent, const FName& SocketName);
@@ -77,8 +78,32 @@ private:
     void PlayAnimMontage(UAnimMontage* Animation);
 
     void InitAnimations(); // находим и подписываемся на AnimNotify (нужно чтобы знать, когда закончилась анимация смены пушки)
-    void OnEquipFinished(USkeletalMeshComponent* MeshComponent); // колбэк для делегата AnimNotify
+    void OnEquipFinished(USkeletalMeshComponent* MeshComponent);  // колбэк для делегата AnimNotify
+    void OnReloadFinished(USkeletalMeshComponent* MeshComponent); // колбэк для делегата AnimNotify
 
     bool CanFire() const;
     bool CanEquip() const;
+    bool CanReload() const;
+
+    // Шаблонная функция (вообще, название немного некорректное, т.к. она достаёт только первый нотифай):
+    template <typename T> T* FindNotifyByClass(UAnimSequenceBase* Animation)
+    {
+        if (!Animation)
+            return nullptr;
+        // берём массив анимационных ивентов:
+        const auto NotifyEvents = Animation->Notifies;
+        for (auto NotifyEvent : NotifyEvents)
+        {
+            // чтобы узнать, является ли данный нотифай нашим нотифаем EquipFinished
+            // мы попытаемся преобразовать данный нотифай к нашему типу:
+            auto AnimNotify = Cast<T>(NotifyEvent.Notify);
+            // если преобразование прошло успешно, то именно этот нотифай нам и нужен
+            if (AnimNotify)
+            {
+                return AnimNotify;
+            }
+        }
+        return nullptr;
+    }
+    // Конец шаблонной функции
 };
