@@ -37,6 +37,18 @@ struct FWeaponData
     UAnimMontage* ReloadAnimMontage;
 };
 
+USTRUCT(BlueprintType)
+struct FWeaponUIData
+{
+    GENERATED_USTRUCT_BODY()
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+    UTexture2D* MainIcon;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+    UTexture2D* CrossHairIcon;
+};
+
 //----------------HEALTH------------------
 
 //Объявляем делегат о том, умер ли наш персонаж (будет доступен только в С++)

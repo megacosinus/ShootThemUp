@@ -26,6 +26,8 @@ public:
     void ChangeClip();
     bool CanReload() const; // определяет, может ли данное оружие делать перезарядку впринципе
 
+    FWeaponUIData GetUIData() const { return UIData; }
+
 protected:
     // Called when the game starts or when spawned
     virtual void BeginPlay() override;
@@ -44,6 +46,9 @@ protected:
     // создаём структуру с патронами (она в начале этого файла)
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
     FAmmoData DefaultAmmo{15, 10, false}; // начальный арсенал оружия
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+    FWeaponUIData UIData;
 
     virtual void MakeShot();
 

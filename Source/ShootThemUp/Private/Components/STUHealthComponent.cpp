@@ -22,6 +22,8 @@ void USTUHealthComponent::BeginPlay()
 {
     Super::BeginPlay();
 
+    check(MaxHealth > 0); // чтобы в некоторых местах кода не было деления на ноль
+
     SetHealth(MaxHealth);
 
     // подпишемся на получение урона:
