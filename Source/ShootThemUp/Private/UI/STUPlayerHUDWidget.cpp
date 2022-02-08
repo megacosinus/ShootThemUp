@@ -6,32 +6,68 @@
 
 float USTUPlayerHUDWidget::GetHealthPercent() const
 {
-    const auto Player = GetOwningPlayerPawn();
-    if (!Player)
-        return 0.0f;
-
-    const auto Component = Player->GetComponentByClass(USTUHealthComponent::StaticClass()); // на null можем не проверять, т.к. это проверяется в cast'е
-
-    // GetComponentByClass возвращает указатель на UActorComponent, по этому нам нужно привести его к USTUHealthComponent:
-    const auto HealthComponent = Cast<USTUHealthComponent>(Component);
+    const auto HealthComponent = GetHealthComponent();
     if (!HealthComponent)
         return 0.0f;
 
     return HealthComponent->GetHealthPercent();
 }
 
-bool USTUPlayerHUDWidget::GetWeaponUIData(FWeaponUIData& UIData) const
+// по сути, это функция-обёртка над аналогичной функцией в WeaponComponent, чтобы не делать данное преобразоывник в BluePrint
+bool USTUPlayerHUDWidget::GetCurrentWeaponUIData(FWeaponUIData& UIData) const
+{
+    const auto WeaponComponent = GetWeaponComponent();
+    if (!WeaponComponent)
+        return false;
+
+    return WeaponComponent->GetCurrentWeaponUIData(UIData);
+}
+
+bool USTUPlayerHUDWidget::GetCurrentWeaponAmmoData(FAmmoData& AmmoData) const
+{
+    const auto WeaponComponent = GetWeaponComponent();
+    if (!WeaponComponent)
+        return false;
+
+    return WeaponComponent->GetCurrentWeaponAmmoData(AmmoData);
+}
+
+bool USTUPlayerHUDWidget::IsPlayerAlive() const
+{
+    const auto HealthComponent = GetHealthComponent();
+
+    return HealthComponent && !HealthComponent->IsDead(); // вообще, срабатывать будет на нулевой указатель HealthComponent
+}
+
+bool USTUPlayerHUDWidget::IsPlayerSpectating() const
+{
+    const auto Controller = GetOwningPlayer();
+
+    return Controller && Controller->GetStateName() == NAME_Spectating;
+}
+
+USTUWeaponComponent* USTUPlayerHUDWidget::GetWeaponComponent() const
 {
     const auto Player = GetOwningPlayerPawn();
     if (!Player)
-        return false;
+        return nullptr;
 
     const auto Component = Player->GetComponentByClass(USTUWeaponComponent::StaticClass()); // на null можем не проверять, т.к. это проверяется в cast'е
 
     // GetComponentByClass возвращает указатель на UActorComponent, по этому нам нужно привести его к USTUHealthComponent:
     const auto WeaponComponent = Cast<USTUWeaponComponent>(Component);
-    if (!WeaponComponent)
-        return false;
+    return WeaponComponent;
+}
 
-    return WeaponComponent->GetWeaponUIData(UIData);
+USTUHealthComponent* USTUPlayerHUDWidget::GetHealthComponent() const
+{
+    const auto Player = GetOwningPlayerPawn();
+    if (!Player)
+        return nullptr;
+
+    const auto Component = Player->GetComponentByClass(USTUHealthComponent::StaticClass()); // на null можем не проверять, т.к. это проверяется в cast'е
+
+    // GetComponentByClass возвращает указатель на UActorComponent, по этому нам нужно привести его к USTUHealthComponent:
+    const auto HealthComponent = Cast<USTUHealthComponent>(Component);
+    return HealthComponent;
 }

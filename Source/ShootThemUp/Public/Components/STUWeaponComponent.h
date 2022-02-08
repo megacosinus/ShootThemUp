@@ -22,7 +22,9 @@ public:
     void NextWeapon();
     void Reload();
 
-    bool GetWeaponUIData(FWeaponUIData& UIData) const;
+    // функции для получения информации о текущих иконках и картинках оружия для вывода на экран через STUPlayerHUD (вызывются оттуда)
+    bool GetCurrentWeaponUIData(FWeaponUIData& UIData) const;
+    bool GetCurrentWeaponAmmoData(FAmmoData& AmmoData) const;
 
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")

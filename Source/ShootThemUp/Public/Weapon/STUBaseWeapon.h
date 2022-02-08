@@ -27,6 +27,7 @@ public:
     bool CanReload() const; // определяет, может ли данное оружие делать перезарядку впринципе
 
     FWeaponUIData GetUIData() const { return UIData; }
+    FAmmoData GetAmmoData() const { return CurrentAmmo; }
 
 protected:
     // Called when the game starts or when spawned
