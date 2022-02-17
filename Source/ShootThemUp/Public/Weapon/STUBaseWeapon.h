@@ -29,6 +29,8 @@ public:
     FWeaponUIData GetUIData() const { return UIData; }
     FAmmoData GetAmmoData() const { return CurrentAmmo; }
 
+    bool TryToAddAmmo(int32 ClipsAmount); // для пикапов
+
 protected:
     // Called when the game starts or when spawned
     virtual void BeginPlay() override;
@@ -56,6 +58,8 @@ protected:
     void DecreaseAmmo(); // функция, которая будет уменьшать количество патронов
     bool IsAmmoEmpty() const;
     bool IsClipEmpty() const;
+    bool IsAmmoFull() const;
+
     void LogAmmo();
 
 private:

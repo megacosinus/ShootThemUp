@@ -52,7 +52,7 @@ void ASTUBaseWeapon::DecreaseAmmo()
     {
         StopFire();
         // вызываем делегата
-        OnClipEmpty.Broadcast();
+        OnClipEmpty.Broadcast(this);
     }
 }
 
@@ -64,6 +64,12 @@ bool ASTUBaseWeapon::IsAmmoEmpty() const
 bool ASTUBaseWeapon::IsClipEmpty() const
 {
     return CurrentAmmo.Bullets == 0;
+}
+
+bool ASTUBaseWeapon::IsAmmoFull() const
+{
+    return CurrentAmmo.Clips == DefaultAmmo.Clips && //
+           CurrentAmmo.Bullets == DefaultAmmo.Bullets;
 }
 
 void ASTUBaseWeapon::ChangeClip()
@@ -91,4 +97,41 @@ void ASTUBaseWeapon::LogAmmo()
     FString AmmoInfo = "Ammo: " + FString::FromInt(CurrentAmmo.Bullets) + " / ";
     AmmoInfo += CurrentAmmo.Infinite ? "Infinite" : FString::FromInt(CurrentAmmo.Clips);
     UE_LOG(LogBaseWeapon, Display, TEXT("%s"), *AmmoInfo);
+}
+
+bool ASTUBaseWeapon::TryToAddAmmo(int32 ClipsAmount)
+{
+    if (CurrentAmmo.Infinite || IsAmmoFull() || ClipsAmount <= 0)
+        return false;
+
+    if (IsAmmoEmpty())
+    {
+        UE_LOG(LogBaseWeapon, Display, TEXT("Ammo was empty!"));
+        CurrentAmmo.Clips = FMath::Clamp(CurrentAmmo.Clips + ClipsAmount, 0, DefaultAmmo.Clips + 1); // CurrentAmmo.Clips == 0 (можно убрать)
+                                                                                                     // DefaultAmmo.Clips + 1, т.к. в следующей строке мы эту обойму зарядим
+        OnClipEmpty.Broadcast(this);
+    }
+    else if (CurrentAmmo.Clips < DefaultAmmo.Clips)
+    {
+        const auto NextClipsAmount = CurrentAmmo.Clips + ClipsAmount;
+
+        if (DefaultAmmo.Clips - NextClipsAmount >= 0)
+        {
+            CurrentAmmo.Clips = NextClipsAmount;
+            UE_LOG(LogBaseWeapon, Display, TEXT("Clips were added"));
+        }
+        else
+        {
+            CurrentAmmo.Clips = DefaultAmmo.Clips;
+            CurrentAmmo.Bullets = DefaultAmmo.Bullets;
+            UE_LOG(LogBaseWeapon, Display, TEXT("Ammo is full now"));
+        }
+    }
+    else
+    {
+        CurrentAmmo.Bullets = DefaultAmmo.Bullets;
+        UE_LOG(LogBaseWeapon, Display, TEXT("Bullets were added"));
+    }
+
+    return true;
 }

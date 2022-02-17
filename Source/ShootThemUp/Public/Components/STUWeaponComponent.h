@@ -26,6 +26,8 @@ public:
     bool GetCurrentWeaponUIData(FWeaponUIData& UIData) const;
     bool GetCurrentWeaponAmmoData(FAmmoData& AmmoData) const;
 
+    bool TryToAddAmmo(TSubclassOf<ASTUBaseWeapon> WeaponType, int32 ClipsAmount); // функция для пополнения магазина. Например от пикапа
+
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
     TArray<FWeaponData> WeaponData;
@@ -78,6 +80,6 @@ private:
     bool CanReload() const;
 
     // колбэк на делегат OnEmptyClip (из STUBaseWeapon)
-    void OnEmptyClip();
+    void OnEmptyClip(ASTUBaseWeapon* AmmoEmtyWeapon);
     void ChangeClip();
 };

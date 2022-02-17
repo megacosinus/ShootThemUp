@@ -6,7 +6,7 @@
 class ASTUBaseWeapon;
 
 //делегат, который будет оповещать WeaponComponent о том, что у нас закончились патроны:
-DECLARE_MULTICAST_DELEGATE(FOnClipEmptySignature);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnClipEmptySignature, ASTUBaseWeapon*);
 
 // структура для патронов
 USTRUCT(BlueprintType)
