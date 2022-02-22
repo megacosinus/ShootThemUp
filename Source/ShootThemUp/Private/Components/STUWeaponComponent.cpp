@@ -233,6 +233,7 @@ void USTUWeaponComponent::OnEmptyClip(ASTUBaseWeapon* AmmoEmtyWeapon)
                 Weapon->ChangeClip();
             }
         }
+        // в принципе, можно просто AmmoEmptyWeapon->ChangeClip()..
     }
 }
 
