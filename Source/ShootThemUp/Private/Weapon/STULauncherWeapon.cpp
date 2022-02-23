@@ -35,8 +35,9 @@ void ASTULauncherWeapon::MakeShot()
 
     // получаем информацию о первом объекте, который нам встретится на линии полёта пули
     FCollisionQueryParams CollisionParams;
-    CollisionParams.AddIgnoredActor(GetOwner()); // при расчёте коллизий игнорируем игрока
-    FHitResult HitResult;                        // так же эта функция возвращает bool о том, было ли пересечение
+    CollisionParams.AddIgnoredActor(GetOwner());    // при расчёте коллизий игнорируем игрока
+    CollisionParams.bReturnPhysicalMaterial = true; // передаём физический материал, в который попали
+    FHitResult HitResult;                           // так же эта функция возвращает bool о том, было ли пересечение
     GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Visibility, CollisionParams);
 
     const FVector EndPoint = HitResult.bBlockingHit ? HitResult.ImpactPoint : TraceEnd;
