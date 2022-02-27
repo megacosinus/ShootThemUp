@@ -7,6 +7,8 @@
 #include "STURifleWeapon.generated.h"
 
 class USTUWeaponFXComponent;
+class UNiagaraComponent;
+class UNiagaraSystem;
 
 UCLASS()
 class SHOOTTHEMUP_API ASTURifleWeapon : public ASTUBaseWeapon
@@ -29,6 +31,14 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
     float DamageAmount = 10.0f;
 
+    // трасер от пули, созданный в ниагаре
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VFX")
+    UNiagaraSystem* TraceFX;
+
+    // название конечной точки трасера:
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VFX")
+    FString TraceTargetName = "TraceTarget";
+
     UPROPERTY(VisibleAnywhere, Category = "VFX")
     USTUWeaponFXComponent* WeaponFXComponent;
 
@@ -38,5 +48,11 @@ protected:
 private:
     FTimerHandle ShotTimerHandle;
 
+    UPROPERTY()
+    UNiagaraComponent* MuzzleFXComponent;
+
     void MakeDamage(const FHitResult& HitResult);
+    void InitMuzzleFX();
+    void SetMuzzleFXVisibility(bool Visible);
+    void SpawnTraceFX(const FVector& TraceStart, const FVector& TraceEnd); // функция, отрисовывающая трасер
 };
