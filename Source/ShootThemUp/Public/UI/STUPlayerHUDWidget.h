@@ -27,4 +27,14 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "UI")
     bool IsPlayerSpectating() const;
+
+    //Ивент который будет виден в БП (тело функции не нужно создавать):
+    UFUNCTION(BlueprintImplementableEvent, Category = "UI")
+    void OnTakeDamage();
+
+    virtual bool Initialize() override;
+
+private:
+    // колбэк для функции HealthChange
+    void OnHealthChanged(float Health, float HealthDelta);
 };

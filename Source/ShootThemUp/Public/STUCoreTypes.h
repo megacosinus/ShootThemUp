@@ -54,7 +54,7 @@ struct FWeaponUIData
 //Объявляем делегат о том, умер ли наш персонаж (будет доступен только в С++)
 DECLARE_MULTICAST_DELEGATE(FOnDeathSignature);
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnHealthChangedSignature, float);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnHealthChangedSignature, float, float);
 
 //------------------VFX-------------------
 

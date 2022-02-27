@@ -5,6 +5,28 @@
 #include "Components/STUWeaponComponent.h"
 #include "STUUtils.h"
 
+bool USTUPlayerHUDWidget::Initialize()
+{
+    // получем HealthComponent:
+    const auto HealthComponent = STUUtils::GetSTUPlayerComponent<USTUHealthComponent>(GetOwningPlayerPawn());
+    // если он ненулевой то биндимся на делегат OnHealthChange:
+    if (HealthComponent)
+    {
+        HealthComponent->OnHealthChanged.AddUObject(this, &USTUPlayerHUDWidget::OnHealthChanged);
+    }
+
+    return Super::Initialize();
+}
+
+void USTUPlayerHUDWidget::OnHealthChanged(float Health, float HealthDelta)
+{
+    // Оповещаем блупринт о возникновении этого события если жизнь уменьшается:
+    if (HealthDelta < 0.0f)
+    {
+        OnTakeDamage();
+    }
+}
+
 float USTUPlayerHUDWidget::GetHealthPercent() const
 {
     const auto HealthComponent = STUUtils::GetSTUPlayerComponent<USTUHealthComponent>(GetOwningPlayerPawn());

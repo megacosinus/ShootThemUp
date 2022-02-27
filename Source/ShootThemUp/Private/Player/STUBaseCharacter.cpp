@@ -52,7 +52,7 @@ void ASTUBaseCharacter::BeginPlay()
 
     // поскольку BaseCharacter запускается после модулей, то бродкаст с тем, что жизней 100 не прилетает сюда
     // по этому в самом начале запросим количество жизней в явном виде:
-    OnHealthChanged(HealthComponent->GetHealth());
+    OnHealthChanged(HealthComponent->GetHealth(), 0.0f);
     // подписываемся на делегат, извещающий о смерти персонажа
     HealthComponent->OnDeath.AddUObject(this, &ASTUBaseCharacter::OnDeath);
     // подписываемся на делегат, извещающий о изменении жизней (сделано в чтобы убрать опрос из Tick)
@@ -62,7 +62,7 @@ void ASTUBaseCharacter::BeginPlay()
     LandedDelegate.AddDynamic(this, &ASTUBaseCharacter::OnGroundLanded);
 }
 
-void ASTUBaseCharacter::OnHealthChanged(float Health)
+void ASTUBaseCharacter::OnHealthChanged(float Health, float HealthDelta)
 {
     HealthTextComponent->SetText(FText::FromString(FString::Printf(TEXT("%.0f"), Health)));
 }
@@ -79,6 +79,7 @@ void ASTUBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
     Super::SetupPlayerInputComponent(PlayerInputComponent);
     check(PlayerInputComponent);
     check(WeaponComponent);
+    check(GetMesh());
 
     PlayerInputComponent->BindAxis("MoveForward", this, &ASTUBaseCharacter::MoveForward);
     PlayerInputComponent->BindAxis("MoveRight", this, &ASTUBaseCharacter::MoveRight);
@@ -147,7 +148,7 @@ void ASTUBaseCharacter::OnDeath()
     UE_LOG(BaseCharacterLog, Display, TEXT("Player %s is dead"), *GetName());
 
     // проигрываем анимацию смерти. Проверка на валидность встроена в функцию, так что можно тут не делать.
-    PlayAnimMontage(DeathAnimMontage);
+    // PlayAnimMontage(DeathAnimMontage);
 
     // после смерти запрещаем движение персонажа
     GetCharacterMovement()->DisableMovement();
@@ -163,6 +164,10 @@ void ASTUBaseCharacter::OnDeath()
 
     GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
     WeaponComponent->StopFire();
+
+    // включаем RagDoll во время смерти
+    GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+    GetMesh()->SetSimulatePhysics(true);
 }
 
 void ASTUBaseCharacter::OnGroundLanded(const FHitResult& Hit)
