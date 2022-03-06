@@ -12,7 +12,8 @@ class USTUHealthComponent;
 class UTextRenderComponent;
 class USTUWeaponComponent;
 
-UCLASS() class SHOOTTHEMUP_API ASTUBaseCharacter : public ACharacter
+UCLASS()
+class SHOOTTHEMUP_API ASTUBaseCharacter : public ACharacter
 {
     GENERATED_BODY()
 
