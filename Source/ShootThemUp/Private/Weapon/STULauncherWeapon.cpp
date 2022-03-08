@@ -19,14 +19,20 @@ void ASTULauncherWeapon::MakeShot()
     if (!Player)
         return;
 
-    const auto Controller = Player->GetController<APlayerController>();
-    if (!Controller)
-        return;
-
     FVector ViewLocation;
     FRotator ViewRotation;
-    Controller->GetPlayerViewPoint(ViewLocation, ViewRotation);
-
+    if (Player->IsPlayerControlled())
+    {
+        const auto Controller = Player->GetController<APlayerController>();
+        if (!Controller)
+            return;
+        Controller->GetPlayerViewPoint(ViewLocation, ViewRotation);
+    }
+    else
+    {
+        ViewLocation = (WeaponMesh->GetSocketTransform(MuzzleSocketName)).GetLocation();
+        ViewRotation = WeaponMesh->GetSocketRotation(MuzzleSocketName);
+    }
     const FTransform SocketTransform = WeaponMesh->GetSocketTransform(MuzzleSocketName);
 
     const FVector TraceStart = ViewLocation;

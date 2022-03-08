@@ -9,6 +9,8 @@
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
 
+DEFINE_LOG_CATEGORY_STATIC(LogRifleWeapon, All, All);
+
 ASTURifleWeapon::ASTURifleWeapon()
 {
     WeaponFXComponent = CreateDefaultSubobject<USTUWeaponFXComponent>("WeaponFXComponent");
@@ -49,18 +51,25 @@ void ASTURifleWeapon::MakeShot()
         return;
     }
 
-    const auto Controller = Player->GetController<APlayerController>();
-    if (!Controller)
-    {
-        StopFire();
-        return;
-    }
-
     FVector ViewLocation;
     FRotator ViewRotation;
-    Controller->GetPlayerViewPoint(ViewLocation, ViewRotation);
+    FVector MuzzleLocation = (WeaponMesh->GetSocketTransform(MuzzleSocketName)).GetLocation();
 
-    const FTransform SocketTransform = WeaponMesh->GetSocketTransform(MuzzleSocketName);
+    if (Player->IsPlayerControlled())
+    {
+        const auto Controller = Player->GetController<APlayerController>();
+        if (!Controller)
+        {
+            StopFire();
+            return;
+        }
+        Controller->GetPlayerViewPoint(ViewLocation, ViewRotation);
+    }
+    else
+    {
+        ViewLocation = MuzzleLocation;
+        ViewRotation = WeaponMesh->GetSocketRotation(MuzzleSocketName);
+    }
 
     const FVector TraceStart = ViewLocation;
     const auto HalfRad = FMath::DegreesToRadians(BulletSpread);                      //половина угла разброса пуль
@@ -72,7 +81,7 @@ void ASTURifleWeapon::MakeShot()
     CollisionParams.AddIgnoredActor(GetOwner());    // при расчёте коллизий игнорируем игрока
     CollisionParams.bReturnPhysicalMaterial = true; // передаём физический материал, в который попали
     FHitResult HitResult;                           // так же эта функция возвращает bool о том, было ли пересечение
-    GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Visibility, CollisionParams);
+    GetWorld()->LineTraceSingleByChannel(HitResult, ViewLocation, TraceEnd, ECollisionChannel::ECC_Visibility, CollisionParams);
 
     FVector TraceFXEnd = TraceEnd;
 
@@ -80,12 +89,9 @@ void ASTURifleWeapon::MakeShot()
     {
         TraceFXEnd = HitResult.ImpactPoint;
         MakeDamage(HitResult);
-        /*DrawDebugLine(GetWorld(), SocketTransform.GetLocation(), HitResult.ImpactPoint, FColor::Red, false, 3.0f, 0, 3.0f);
-        DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 10.0f, 24, FColor::Red, false, 5.0f);*/
         WeaponFXComponent->PlayImpactFX(HitResult);
     }
-
-    SpawnTraceFX(SocketTransform.GetLocation(), TraceFXEnd);
+    SpawnTraceFX(MuzzleLocation, TraceFXEnd);
 
     DecreaseAmmo();
 }
@@ -96,16 +102,11 @@ void ASTURifleWeapon::MakeDamage(const FHitResult& HitResult)
     if (!DamagedActor)
         return;
 
-    // надо бы в отдельную функцию вынести, т.к. повторяется
-    const auto Player = Cast<ACharacter>(GetOwner());
-    if (!Player)
+    const auto Pawn = Cast<APawn>(GetOwner());
+    if (!Pawn)
         return;
 
-    const auto Controller = Player->GetController<APlayerController>();
-    if (!Controller)
-        return;
-    //
-
+    const auto Controller = Pawn->GetController();
     DamagedActor->TakeDamage(DamageAmount, FDamageEvent(), Controller, this);
 }
 
