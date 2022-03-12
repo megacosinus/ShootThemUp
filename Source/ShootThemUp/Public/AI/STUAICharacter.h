@@ -19,4 +19,7 @@ public:
     // можно было бы сделать и в контроллере, но лучше здесь, т.к. контроллером может завладеть другой персонаж
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "AI")
     UBehaviorTree* BehaviorTreeAsset;
+
+protected:
+    virtual void OnDeath() override;
 };

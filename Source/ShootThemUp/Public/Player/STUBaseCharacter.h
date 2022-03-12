@@ -56,6 +56,7 @@ protected:
 
     // Called when the game starts or when spawned
     virtual void BeginPlay() override;
+    virtual void OnDeath(); // виртуальная чтобы можно было переопределить в AICharacter
 
 public:
     // Called every frame
@@ -82,7 +83,6 @@ private:
     void OnStartRunning();
     void OnStopRunning();
 
-    void OnDeath();
     void OnHealthChanged(float Health, float HealthDelta);
 
     UFUNCTION()

@@ -17,9 +17,9 @@ public:
     // Sets default values for this component's properties
     USTUWeaponComponent();
 
-    void StartFire();
+    virtual void StartFire();
     void StopFire();
-    void NextWeapon();
+    virtual void NextWeapon();
     void Reload();
 
     // функции для получения информации о текущих иконках и картинках оружия для вывода на экран через STUPlayerHUD (вызывются оттуда)
@@ -41,13 +41,6 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
     UAnimMontage* EquipAnimMontage;
 
-    // Called when the game starts
-    virtual void BeginPlay() override;
-
-    // Тут мы убираем убираем оружие и прекращаем стрельбу при смерте персонажа
-    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-
-private:
     // делаем глобальную переменную с текущим оружием, ставим пока пустой, в cpp файле, в SpawnWeapon(), ей присвоится оружие
     UPROPERTY()
     ASTUBaseWeapon* CurrentWeapon = nullptr;
@@ -56,18 +49,29 @@ private:
     UPROPERTY()
     TArray<ASTUBaseWeapon*> Weapons;
 
-    UPROPERTY()
-    UAnimMontage* CurrentReloadAnimMontage = nullptr;
-
     // индекс текущего оружия
     int32 CurrentWeaponIndex = 0;
+
+    // Called when the game starts
+    virtual void BeginPlay() override;
+
+    // Тут мы убираем убираем оружие и прекращаем стрельбу при смерте персонажа
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+    bool CanFire() const;
+    bool CanEquip() const;
+
+    void EquipWeapon(int32 WeaponIndex);
+
+private:
+    UPROPERTY()
+    UAnimMontage* CurrentReloadAnimMontage = nullptr;
 
     bool EquipAnimInProgress = false;
     bool ReloadAnimInProgress = false;
 
     void SpawnWeapons();
     void AttachWeaponToSocket(ASTUBaseWeapon* Weapon, USceneComponent* SceneComponent, const FName& SocketName);
-    void EquipWeapon(int32 WeaponIndex);
 
     void PlayAnimMontage(UAnimMontage* Animation);
 
@@ -75,8 +79,6 @@ private:
     void OnEquipFinished(USkeletalMeshComponent* MeshComponent);  // колбэк для делегата AnimNotify
     void OnReloadFinished(USkeletalMeshComponent* MeshComponent); // колбэк для делегата AnimNotify
 
-    bool CanFire() const;
-    bool CanEquip() const;
     bool CanReload() const;
 
     // колбэк на делегат OnEmptyClip (из STUBaseWeapon)
