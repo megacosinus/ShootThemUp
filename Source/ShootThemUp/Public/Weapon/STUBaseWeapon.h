@@ -34,6 +34,7 @@ public:
     bool TryToAddAmmo(int32 ClipsAmount); // для пикапов
 
     bool IsAmmoEmpty() const;
+    bool IsAmmoFull() const;
 
 protected:
     // Called when the game starts or when spawned
@@ -64,7 +65,6 @@ protected:
 
     void DecreaseAmmo(); // функция, которая будет уменьшать количество патронов
     bool IsClipEmpty() const;
-    bool IsAmmoFull() const;
 
     void LogAmmo();
 
