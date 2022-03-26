@@ -65,6 +65,7 @@ void ASTUGameModeBase::GameTimerUpdate()
         if (CurrentRound + 1 <= GameData.RoundsNum)
         {
             ++CurrentRound;
+            ResetPlayers();
             StartRound();
         }
         else
@@ -72,4 +73,23 @@ void ASTUGameModeBase::GameTimerUpdate()
             UE_LOG(LogSTUGameModeBase, Display, TEXT("====== Game Over ======"));
         }
     }
+}
+
+void ASTUGameModeBase::ResetPlayers()
+{
+    if (!GetWorld())
+        return;
+    for (auto It = GetWorld()->GetControllerIterator(); It; ++It) // цикл выполняется, пока итератор не нулевой
+    {
+        ResetOnePlayer(It->Get()); // сама функция ниже
+    }
+}
+
+void ASTUGameModeBase::ResetOnePlayer(AController* Controller)
+{
+    if (Controller && Controller->GetPawn())
+    {
+        Controller->GetPawn()->Reset();
+    }
+    RestartPlayer(Controller);
 }

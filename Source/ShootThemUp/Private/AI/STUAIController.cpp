@@ -9,6 +9,8 @@ ASTUAIController::ASTUAIController()
 {
     STUAIPerceptionComponent = CreateDefaultSubobject<USTUAIPerceptionComponent>("STUAIPerceptionComponent");
     SetPerceptionComponent(*STUAIPerceptionComponent); // передаётся по ссылке, по этому указатель необходимо разименовать
+
+    bWantsPlayerState = true;
 }
 
 void ASTUAIController::OnPossess(APawn* InPawn)
