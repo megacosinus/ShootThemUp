@@ -20,6 +20,8 @@ public:
     virtual void StartPlay() override; // опеределяется в GameModeBase.h
     virtual UClass* GetDefaultPawnClassForController_Implementation(AController* InController) override;
 
+    void Killed(AController* KillerController, AController* VictimController);
+
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "Game")
     TSubclassOf<AAIController> AIControllerClass;
@@ -45,4 +47,6 @@ private:
     void CreateTeamsInfo();
     FLinearColor DetermineColorByTeamID(int32 TeamID) const; // возвращает цвет команды
     void SetPlayerColor(AController* Controller);            // будет передавать классу чарактера его цвет
+
+    void LogPlayerInfo();
 };

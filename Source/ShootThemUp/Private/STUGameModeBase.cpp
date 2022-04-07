@@ -74,6 +74,7 @@ void ASTUGameModeBase::GameTimerUpdate()
         else
         {
             UE_LOG(LogSTUGameModeBase, Display, TEXT("====== Game Over ======"));
+            LogPlayerInfo();
         }
     }
 }
@@ -144,4 +145,38 @@ void ASTUGameModeBase::SetPlayerColor(AController* Controller)
         return;
 
     Character->SetPlayerColor(PlayerState->GetTeamColor());
+}
+
+void ASTUGameModeBase::Killed(AController* KillerController, AController* VictimController)
+{
+    const auto KillerPlayerState = KillerController ? Cast<ASTUPlayerState>(KillerController->PlayerState) : nullptr;
+    const auto VictimPlayerState = VictimController ? Cast<ASTUPlayerState>(VictimController->PlayerState) : nullptr;
+
+    if (KillerPlayerState)
+    {
+        KillerPlayerState->AddKill();
+    }
+
+    if (VictimPlayerState)
+    {
+        VictimPlayerState->AddDeath();
+    }
+}
+
+void ASTUGameModeBase::LogPlayerInfo()
+{
+    if (!GetWorld())
+        return;
+    for (auto It = GetWorld()->GetControllerIterator(); It; ++It) // цикл выполняется, пока итератор не нулевой
+    {
+        const auto Controller = It->Get(); // сырой указатель
+        if (!Controller)
+            continue;
+        //если нет, то:
+        const auto PlayerState = Cast<ASTUPlayerState>(Controller->PlayerState); // каст потому что нужно привести базовый плеерстэйт к нашему
+        if (!PlayerState)
+            continue;
+
+        PlayerState->LogInfo();
+    }
 }
