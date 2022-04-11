@@ -8,6 +8,7 @@
 #include "Player/STUPlayerState.h"
 #include "STUUtils.h"
 #include "Components/STURespawnComponent.h"
+#include "EngineUtils.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogSTUGameModeBase, All, All);
 
@@ -77,8 +78,7 @@ void ASTUGameModeBase::GameTimerUpdate()
         }
         else
         {
-            UE_LOG(LogSTUGameModeBase, Display, TEXT("====== Game Over ======"));
-            LogPlayerInfo();
+            GameOver();
         }
     }
 }
@@ -203,4 +203,20 @@ void ASTUGameModeBase::StartRespawn(AController* Controller)
 void ASTUGameModeBase::RespawnRequest(AController* Controller)
 {
     ResetOnePlayer(Controller);
+}
+
+void ASTUGameModeBase::GameOver()
+{
+    UE_LOG(LogSTUGameModeBase, Display, TEXT("====== Game Over ======"));
+    LogPlayerInfo();
+
+    // делаем цикл по всем паунам, которые доступны в мире
+    for (auto Pawn : TActorRange<APawn>(GetWorld()))
+    {
+        if (Pawn)
+        {
+            Pawn->TurnOff();
+            Pawn->DisableInput(nullptr);
+        }
+    }
 }
