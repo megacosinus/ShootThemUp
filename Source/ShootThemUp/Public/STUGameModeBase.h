@@ -22,6 +22,12 @@ public:
 
     void Killed(AController* KillerController, AController* VictimController);
 
+    FGameData GetGameData() const { return GameData; }
+    int32 GetCurrentRoundNum() const { return CurrentRound; }
+    int32 GetRoundSecondsRemaining() const { return RoundCountDown; }
+
+    void RespawnRequest(AController* Controller);
+
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "Game")
     TSubclassOf<AAIController> AIControllerClass;
@@ -49,4 +55,6 @@ private:
     void SetPlayerColor(AController* Controller);            // будет передавать классу чарактера его цвет
 
     void LogPlayerInfo();
+
+    void StartRespawn(AController* Controller);
 };
