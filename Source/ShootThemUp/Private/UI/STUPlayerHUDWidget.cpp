@@ -7,15 +7,26 @@
 
 bool USTUPlayerHUDWidget::Initialize()
 {
-    // получем HealthComponent:
-    const auto HealthComponent = STUUtils::GetSTUPlayerComponent<USTUHealthComponent>(GetOwningPlayerPawn());
-    // если он ненулевой то биндимся на делегат OnHealthChange:
-    if (HealthComponent)
+    // подписываемся на делегат, который будет сообщать нам о том, что у персонажа новый паун (респавнился после смерти)
+    if (GetOwningPlayer())
     {
-        HealthComponent->OnHealthChanged.AddUObject(this, &USTUPlayerHUDWidget::OnHealthChanged);
+        GetOwningPlayer()->GetOnNewPawnNotifier().AddUObject(this, &USTUPlayerHUDWidget::OnNewPawn);
+        // в первый раз нужно вызвать функцию OnNewPawn явно (т.к. инициилизация происходит до On Possesd):
+        OnNewPawn(GetOwningPlayerPawn());
     }
 
     return Super::Initialize();
+}
+
+void USTUPlayerHUDWidget::OnNewPawn(APawn* NewPawn)
+{
+    // получем HealthComponent:
+    const auto HealthComponent = STUUtils::GetSTUPlayerComponent<USTUHealthComponent>(NewPawn);
+    // если он ненулевой то биндимся на делегат OnHealthChange:
+    if (HealthComponent && !HealthComponent->OnHealthChanged.IsBoundToObject(this))
+    {
+        HealthComponent->OnHealthChanged.AddUObject(this, &USTUPlayerHUDWidget::OnHealthChanged);
+    }
 }
 
 void USTUPlayerHUDWidget::OnHealthChanged(float Health, float HealthDelta)
