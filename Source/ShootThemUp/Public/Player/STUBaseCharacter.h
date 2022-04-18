@@ -6,10 +6,7 @@
 #include "GameFramework/Character.h"
 #include "STUBaseCharacter.generated.h"
 
-class UCameraComponent;
-class USpringArmComponent;
 class USTUHealthComponent;
-class UTextRenderComponent;
 class USTUWeaponComponent;
 
 UCLASS()
@@ -27,16 +24,7 @@ public:
 
 protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-    USpringArmComponent* SpringArmComponent;
-
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-    UCameraComponent* CameraComponent;
-
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
     USTUHealthComponent* HealthComponent; // весь код жизней в STUHealthComponent.h
-
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-    UTextRenderComponent* HealthTextComponent;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
     USTUWeaponComponent* WeaponComponent;
@@ -65,12 +53,9 @@ public:
     // Called every frame
     virtual void Tick(float DeltaTime) override;
 
-    // Called to bind functionality to input
-    virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
     // функци€, котора€ возвращает, бежит ли персонаж (нужно дл€ анимации бега
     UFUNCTION(BlueprintCallable, Category = "Movement")
-    bool IsRunning() const;
+    virtual bool IsRunning() const;
 
     // функци€, котора€ будет возвращать значени€ угла дл€ правильной обработки анимации движени€ в стороны
     UFUNCTION(BlueprintCallable, Category = "Movement")
@@ -79,15 +64,6 @@ public:
     void SetPlayerColor(const FLinearColor& Color);
 
 private:
-    bool WantsToRun = false;
-    bool IsMovingForward = false;
-
-    void MoveForward(float Amount);
-    void MoveRight(float Amount);
-
-    void OnStartRunning();
-    void OnStopRunning();
-
     void OnHealthChanged(float Health, float HealthDelta);
 
     UFUNCTION()
