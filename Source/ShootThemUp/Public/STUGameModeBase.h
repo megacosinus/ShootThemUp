@@ -30,6 +30,10 @@ public:
 
     void RespawnRequest(AController* Controller);
 
+    // переопределяем SetPause из GameModeBase, т.к. нам надо ещё добавить переключение режима игры
+    virtual bool SetPause(APlayerController* PC, FCanUnpause CanUnpauseDelegate = FCanUnpause()) override;
+    virtual bool ClearPause() override;
+
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "Game")
     TSubclassOf<AAIController> AIControllerClass;

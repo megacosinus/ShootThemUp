@@ -115,6 +115,7 @@ struct FGameData
     int32 RespawnTime = 5; // seconds
 };
 
+/** Used to show game state */
 UENUM(BlueprintType)
 enum class ESTUMatchState : uint8
 {

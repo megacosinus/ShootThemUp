@@ -232,3 +232,25 @@ void ASTUGameModeBase::SetMatchState(ESTUMatchState State)
     MatchState = State;
     OnMatchStateChanged.Broadcast(MatchState); // сигнатура броадкаста описана в STUCoreTypes.h
 }
+
+bool ASTUGameModeBase::SetPause(APlayerController* PC, FCanUnpause CanUnpauseDelegate)
+{
+    const auto PauseSet = Super::SetPause(PC, CanUnpauseDelegate); // функция может возвращать true/false
+
+    if (PauseSet)
+    {
+        SetMatchState(ESTUMatchState::Pause);
+    }
+
+    return PauseSet;
+}
+
+bool ASTUGameModeBase::ClearPause()
+{
+    const auto PauseCleared = Super::ClearPause();
+    if (PauseCleared)
+    {
+        SetMatchState(ESTUMatchState::InProgress);
+    }
+    return PauseCleared;
+}
