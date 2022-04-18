@@ -53,7 +53,6 @@ struct FWeaponUIData
 
 //Объявляем делегат о том, умер ли наш персонаж (будет доступен только в С++)
 DECLARE_MULTICAST_DELEGATE(FOnDeathSignature);
-
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnHealthChangedSignature, float, float);
 
 //------------------VFX-------------------
@@ -115,3 +114,15 @@ struct FGameData
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Game", meta = (ClampMin = "3", ClampMax = "20"))
     int32 RespawnTime = 5; // seconds
 };
+
+UENUM(BlueprintType)
+enum class ESTUMatchState : uint8
+{
+    WaitingToStart = 0,
+    InProgress,
+    Pause,
+    GameOver
+};
+
+// делегат, оповещающий, что изменился режим игры (используется в STUGameModeBase)
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnMatchStateChangedSignature, ESTUMatchState);
