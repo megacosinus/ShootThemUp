@@ -13,12 +13,11 @@ class SHOOTTHEMUP_API USTUPauseWidget : public UUserWidget
 {
     GENERATED_BODY()
 
-public:
-    virtual bool Initialize() override;
-
 protected:
     UPROPERTY(meta = (BindWidget)) // мета информации для ассоциации кнопки, которая в BP с кнопкой в С++ файле
     UButton* ClearPauseButton;
+
+    virtual void NativeOnInitialized() override;
 
 private:
     UFUNCTION()

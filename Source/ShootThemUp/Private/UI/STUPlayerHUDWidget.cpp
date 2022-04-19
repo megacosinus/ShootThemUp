@@ -5,8 +5,9 @@
 #include "Components/STUWeaponComponent.h"
 #include "STUUtils.h"
 
-bool USTUPlayerHUDWidget::Initialize()
+void USTUPlayerHUDWidget::NativeOnInitialized()
 {
+    Super::NativeOnInitialized();
     // подписываемся на делегат, который будет сообщать нам о том, что у персонажа новый паун (респавнился после смерти)
     if (GetOwningPlayer())
     {
@@ -14,8 +15,6 @@ bool USTUPlayerHUDWidget::Initialize()
         // в первый раз нужно вызвать функцию OnNewPawn явно (т.к. инициилизация происходит до On Possesd):
         OnNewPawn(GetOwningPlayerPawn());
     }
-
-    return Super::Initialize();
 }
 
 void USTUPlayerHUDWidget::OnNewPawn(APawn* NewPawn)
