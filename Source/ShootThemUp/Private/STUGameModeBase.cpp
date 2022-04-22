@@ -27,8 +27,6 @@ void ASTUGameModeBase::StartPlay()
 {
     Super::StartPlay();
 
-    UE_LOG(LogSTUGameModeBase, Display, TEXT("%s"), *GetWorld()->GetGameInstance<USTUGameInstance>()->TestString);
-
     SpawnBots();
     CreateTeamsInfo();
 
