@@ -2,9 +2,11 @@
 
 #include "Menu/UI/STUMenuWidget.h"
 #include "Components/Button.h"
+#include "Components/HorizontalBox.h"
 #include "Kismet/GameplayStatics.h"
 #include "STUGameInstance.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Menu/UI/STULevelItemWidget.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogSTUMenuWidget, All, All);
 
@@ -21,23 +23,71 @@ void USTUMenuWidget::NativeOnInitialized()
     {
         QuitGameButton->OnClicked.AddDynamic(this, &USTUMenuWidget::OnQuitGame);
     }
+
+    InitLevelItems();
+}
+
+void USTUMenuWidget::InitLevelItems()
+{
+    const auto STUGameInstance = GetSTUGameInstance();
+    if (!STUGameInstance)
+        return;
+
+    checkf(STUGameInstance->GetLevelsData().Num() != 0, TEXT("Levels data must not be empty!"));
+
+    if (!LevelItemsBox)
+        return;
+    LevelItemsBox->ClearChildren();
+
+    for (auto LevelData : STUGameInstance->GetLevelsData())
+    {
+        const auto LevelItemWidget = CreateWidget<USTULevelItemWidget>(GetWorld(), LevelItemWidgetClass);
+        if (!LevelItemWidget)
+            continue;
+
+        LevelItemWidget->SetLevelData(LevelData);
+        LevelItemWidget->OnLevelSelected.AddUObject(this, &USTUMenuWidget::OnLevelSelected);
+
+        LevelItemsBox->AddChild(LevelItemWidget);
+        LevelItemWidgets.Add(LevelItemWidget);
+    }
+
+    if (STUGameInstance->GetStartupLevel().LevelName.IsNone())
+    {
+        OnLevelSelected(STUGameInstance->GetLevelsData()[0]);
+    }
+    else
+    {
+        OnLevelSelected(STUGameInstance->GetStartupLevel());
+    }
+}
+
+void USTUMenuWidget::OnLevelSelected(const FLevelData& Data)
+{
+    const auto STUGameInstance = GetSTUGameInstance();
+    if (!STUGameInstance)
+        return;
+
+    STUGameInstance->SetStartupLevel(Data);
+
+    // проходимся по всему массиву уровней чтобы определить, какой из них выбран
+    for (auto LevelItemWidget : LevelItemWidgets)
+    {
+        if (LevelItemWidget)
+        {
+            const auto IsSelected = Data.LevelName == LevelItemWidget->GetLevelData().LevelName;
+            LevelItemWidget->SetSelected(IsSelected); // рамка будет отображаться если мы кликнули на кнопку данного уровня
+        }
+    }
 }
 
 void USTUMenuWidget::OnStartGame()
 {
-    if (!GetWorld())
-        return;
-
-    const auto STUGameInstance = GetWorld()->GetGameInstance<USTUGameInstance>();
+    const auto STUGameInstance = GetSTUGameInstance();
     if (!STUGameInstance)
         return;
 
-    if (STUGameInstance->GetStartupLevelName().IsNone())
-    {
-        UE_LOG(LogSTUMenuWidget, Error, TEXT("Level name is NONE"));
-        return;
-    }
-    UGameplayStatics::OpenLevel(this, STUGameInstance->GetStartupLevelName());
+    UGameplayStatics::OpenLevel(this, STUGameInstance->GetStartupLevel().LevelName);
 }
 
 void USTUMenuWidget::OnQuitGame()
@@ -46,4 +96,11 @@ void USTUMenuWidget::OnQuitGame()
         return;
 
     UKismetSystemLibrary::QuitGame(this, GetOwningPlayer(), EQuitPreference::Quit, true);
+}
+
+USTUGameInstance* USTUMenuWidget::GetSTUGameInstance() const
+{
+    if (!GetWorld())
+        return nullptr;
+    return GetWorld()->GetGameInstance<USTUGameInstance>();
 }
