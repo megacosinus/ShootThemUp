@@ -83,6 +83,15 @@ void USTUMenuWidget::OnLevelSelected(const FLevelData& Data)
 
 void USTUMenuWidget::OnStartGame()
 {
+    // вначале играем анимацию скрытия интерфейса:
+    PlayAnimation(HideAnimation);
+    // затем, в функции ниже (OnAnimationFinished_Implementation), дожидаемся окончания этой анимации и начинаем загрузку:
+}
+
+void USTUMenuWidget::OnAnimationFinished_Implementation(const UWidgetAnimation* Animation)
+{
+    if (Animation != HideAnimation)
+        return;
     const auto STUGameInstance = GetSTUGameInstance();
     if (!STUGameInstance)
         return;
