@@ -3,7 +3,9 @@
 #include "UI/STUPlayerHUDWidget.h"
 #include "Components/STUHealthComponent.h"
 #include "Components/STUWeaponComponent.h"
+#include "Components/ProgressBar.h"
 #include "STUUtils.h"
+#include "Player/STUPlayerState.h"
 
 void USTUPlayerHUDWidget::NativeOnInitialized()
 {
@@ -26,6 +28,7 @@ void USTUPlayerHUDWidget::OnNewPawn(APawn* NewPawn)
     {
         HealthComponent->OnHealthChanged.AddUObject(this, &USTUPlayerHUDWidget::OnHealthChanged);
     }
+    UpdateHealthBar();
 }
 
 void USTUPlayerHUDWidget::OnHealthChanged(float Health, float HealthDelta)
@@ -35,6 +38,7 @@ void USTUPlayerHUDWidget::OnHealthChanged(float Health, float HealthDelta)
     {
         OnTakeDamage();
     }
+    UpdateHealthBar();
 }
 
 float USTUPlayerHUDWidget::GetHealthPercent() const
@@ -77,4 +81,38 @@ bool USTUPlayerHUDWidget::IsPlayerSpectating() const
     const auto Controller = GetOwningPlayer();
 
     return Controller && Controller->GetStateName() == NAME_Spectating;
+}
+
+int32 USTUPlayerHUDWidget::GetKillsNum() const
+{
+    const auto Controller = GetOwningPlayer();
+    if (!Controller)
+        return 0;
+
+    const auto PlayerState = Cast<ASTUPlayerState>(Controller->PlayerState);
+    return PlayerState ? PlayerState->GetKillsNum() : 0;
+}
+
+void USTUPlayerHUDWidget::UpdateHealthBar()
+{
+    if (HealthProgressBar)
+    {
+        HealthProgressBar->SetFillColorAndOpacity(GetHealthPercent() > PercentColorThreshold ? GoodColor : BadColor);
+    }
+}
+
+FString USTUPlayerHUDWidget::FormatBullets(int32 BulletsNum) const
+{
+    const int32 MaxLen = 3;
+    const TCHAR PrefixSymbol = '0';
+
+    auto BulletStr = FString::FromInt(BulletsNum);
+    const auto SymbolsNumToAdd = MaxLen - BulletStr.Len();
+
+    if (SymbolsNumToAdd)
+    {
+        BulletStr = FString::ChrN(SymbolsNumToAdd, PrefixSymbol).Append(BulletStr); // ChrN заполняет указанным символом, Append добавляет ещё текст
+    }
+
+    return BulletStr;
 }

@@ -65,6 +65,7 @@ void USTUGameOverWidget::UpdatePlayerStat()
         PlayerStatRowWidget->SetTeam(STUUtils::TextFromInt(PlayerState->GetTeamID()));
         PlayerStatRowWidget->SetPlayerIndicatorVisibility(Controller->IsPlayerController()); // т.е. если контроллер пользовательский
                                                                                              // то индикатор будет отображаться
+        PlayerStatRowWidget->SetTeamColor(PlayerState->GetTeamColor());
         // мы засетапили одну строчку, надо передать её:
         PlayerStatBox->AddChild(PlayerStatRowWidget);
     }
