@@ -7,6 +7,7 @@
 #include "STUGameInstance.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Menu/UI/STULevelItemWidget.h"
+#include "Sound/SoundCue.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogSTUMenuWidget, All, All);
 
@@ -85,6 +86,7 @@ void USTUMenuWidget::OnStartGame()
 {
     // вначале играем анимацию скрытия интерфейса:
     PlayAnimation(HideAnimation);
+    UGameplayStatics::PlaySound2D(GetWorld(), StartGameSound);
     // затем, в функции ниже (OnAnimationFinished_Implementation), дожидаемся окончания этой анимации и начинаем загрузку:
 }
 
