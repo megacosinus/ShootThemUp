@@ -5,13 +5,18 @@
 #include "STUUtils.h"
 #include "Components/STUHealthComponent.h" // чтобы узнать, живой ли персонаж
 #include "Perception/AISense_Sight.h"
+#include "Perception/AISense_Damage.h"
 
 AActor* USTUAIPerceptionComponent::GetClosestEnemy() const
 {
     TArray<AActor*> PercieveActors; // локальный массив, в котором будем хранить всех акторов в пределах видимости
     GetCurrentlyPerceivedActors(UAISense_Sight::StaticClass(), PercieveActors);
     if (PercieveActors.Num() == 0)
-        return nullptr;
+    {
+        GetCurrentlyPerceivedActors(UAISense_Damage::StaticClass(), PercieveActors); // если никого не видем, то ищем, кто нас задамажил
+        if (PercieveActors.Num() == 0)                                               // а если и таких нет, то:
+            return nullptr;
+    }
 
     const auto Controller = Cast<AAIController>(GetOwner());
     if (!Controller)

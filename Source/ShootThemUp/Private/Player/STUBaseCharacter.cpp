@@ -34,6 +34,8 @@ void ASTUBaseCharacter::BeginPlay()
 
     check(HealthComponent);
     check(GetCharacterMovement());
+    check(GetCapsuleComponent());
+    check(GetMesh());
 
     // поскольку BaseCharacter запускается после модулей, то бродкаст с тем, что жизней 100 не прилетает сюда
     // по этому в самом начале запросим количество жизней в явном виде:
@@ -122,4 +124,18 @@ void ASTUBaseCharacter::SetPlayerColor(const FLinearColor& Color)
         return;
 
     MaterialInst->SetVectorParameterValue(MaterialColorName, Color);
+}
+
+void ASTUBaseCharacter::TurnOff()
+{
+    WeaponComponent->StopFire();
+    WeaponComponent->Zoom(false);
+    Super::TurnOff();
+}
+
+void ASTUBaseCharacter::Reset()
+{
+    WeaponComponent->StopFire();
+    WeaponComponent->Zoom(false);
+    Super::Reset();
 }

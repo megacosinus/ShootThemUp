@@ -8,6 +8,7 @@
 #include "Camera/CameraShakeBase.h"
 #include "STUGameModeBase.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
+#include "Perception/AISense_Damage.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogHealthComponent, All, All);
 
@@ -44,19 +45,19 @@ void USTUHealthComponent::OnTakePointDamage(AActor* DamagedActor, float Damage, 
     FVector ShotFromDirection, const UDamageType* DamageType, AActor* DamageCauser)
 {
     const auto FinalDamage = Damage * GetPointDamageModifier(DamagedActor, BoneName);
-    UE_LOG(LogHealthComponent, Display, TEXT("On point damage: %f, final damage: %f, bone: %s"), Damage, FinalDamage, *BoneName.ToString());
+    // UE_LOG(LogHealthComponent, Display, TEXT("On point damage: %f, final damage: %f, bone: %s"), Damage, FinalDamage, *BoneName.ToString());
     ApplyDamage(FinalDamage, InstigatedBy);
 }
 
 void USTUHealthComponent::OnTakeRadialDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, FVector Origin, FHitResult HitInfo, AController* InstigatedBy, AActor* DamageCauser)
 {
-    UE_LOG(LogHealthComponent, Display, TEXT("On radial damage: %f"), Damage);
+    // UE_LOG(LogHealthComponent, Display, TEXT("On radial damage: %f"), Damage);
     ApplyDamage(Damage, InstigatedBy);
 }
 
 void USTUHealthComponent::OnTakeAnyDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser)
 {
-    UE_LOG(LogHealthComponent, Display, TEXT("On any damage: %f"), Damage);
+    // UE_LOG(LogHealthComponent, Display, TEXT("On any damage: %f"), Damage);
 }
 
 void USTUHealthComponent::ApplyDamage(float Damage, AController* InstigatedBy)
@@ -81,6 +82,7 @@ void USTUHealthComponent::ApplyDamage(float Damage, AController* InstigatedBy)
     }
 
     PlayCameraShake();
+    ReportDamageEvent(Damage, InstigatedBy);
 }
 
 void USTUHealthComponent::HealUpdate()
@@ -161,4 +163,19 @@ float USTUHealthComponent::GetPointDamageModifier(AActor* DamagedActor, const FN
         return 1.0f;
 
     return DamageModifiers[PhysMaterial];
+}
+
+void USTUHealthComponent::ReportDamageEvent(float Damage, AController* InstigatedBy)
+{
+    if (!InstigatedBy || !InstigatedBy->GetPawn() || !GetOwner())
+        return;
+
+    UAISense_Damage::ReportDamageEvent(GetWorld(),   //
+        GetOwner(),                                  //
+        InstigatedBy->GetPawn(),                     //
+        Damage,                                      //
+        InstigatedBy->GetPawn()->GetActorLocation(), //
+        GetOwner()->GetActorLocation());
+    // внутри формируется спец. ивент и передаётся в персепшн систему.
+    // Этот актор будет добавлен а мы сможем его получить
 }
