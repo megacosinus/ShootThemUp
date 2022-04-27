@@ -110,7 +110,11 @@ void ASTURifleWeapon::MakeDamage(const FHitResult& HitResult)
         return;
 
     const auto Controller = Pawn->GetController();
-    DamagedActor->TakeDamage(DamageAmount, FDamageEvent(), Controller, this);
+
+    FPointDamageEvent PointDamageEvent;
+    PointDamageEvent.HitInfo = HitResult;
+
+    DamagedActor->TakeDamage(DamageAmount, PointDamageEvent, Controller, this);
 }
 
 void ASTURifleWeapon::InitFX()
