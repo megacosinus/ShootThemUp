@@ -33,9 +33,10 @@ public:
     FAmmoData GetAmmoData() const { return CurrentAmmo; }
 
     bool TryToAddAmmo(int32 ClipsAmount); // для пикапов
-
     bool IsAmmoEmpty() const;
     bool IsAmmoFull() const;
+
+    virtual void Zoom(bool Enabled) {}
 
 protected:
     // Called when the game starts or when spawned

@@ -29,6 +29,8 @@ public:
     bool TryToAddAmmo(TSubclassOf<ASTUBaseWeapon> WeaponType, int32 ClipsAmount); // функция для пополнения магазина. Например от пикапа
     bool NeedAmmo(TSubclassOf<ASTUBaseWeapon> WeaponType);                        // функция для использования в AI
 
+    void Zoom(bool Enabled);
+
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "Weapon")
     TArray<FWeaponData> WeaponData;

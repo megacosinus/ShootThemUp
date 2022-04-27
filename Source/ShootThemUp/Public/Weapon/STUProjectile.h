@@ -43,6 +43,9 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
     float LifeSeconds = 5.0f;
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
+    float ProjectileSpeed = 3000.0f;
+
     // Called when the game starts or when spawned
     virtual void BeginPlay() override;
 

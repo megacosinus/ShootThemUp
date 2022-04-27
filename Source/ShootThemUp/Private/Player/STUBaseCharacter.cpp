@@ -94,6 +94,7 @@ void ASTUBaseCharacter::OnDeath()
 
     GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
     WeaponComponent->StopFire();
+    WeaponComponent->Zoom(false);
 
     // включаем RagDoll во время смерти
     GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
