@@ -67,5 +67,8 @@
 				"Linux"
 			]
 		}
+	],
+	"TargetPlatforms": [
+		"WindowsNoEditor"
 	]
 }

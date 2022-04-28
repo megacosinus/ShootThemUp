@@ -270,6 +270,9 @@ bool USTUWeaponComponent::GetCurrentWeaponAmmoData(FAmmoData& AmmoData) const
 
 bool USTUWeaponComponent::TryToAddAmmo(TSubclassOf<ASTUBaseWeapon> WeaponType, int32 ClipsAmount)
 {
+    if (!WeaponType || ClipsAmount < 1)
+        return false;
+
     // пройдёмся по всем типам оружия и определим, существует ли нужный
     for (const auto Weapon : Weapons)
     {

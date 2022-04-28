@@ -159,11 +159,11 @@ void ASTURifleWeapon::SpawnTraceFX(const FVector& TraceStart, const FVector& Tra
 
 void ASTURifleWeapon::Zoom(bool Enabled)
 {
-    const auto Player = Cast<ACharacter>(GetOwner());
-    if (!Player)
+    const auto Pawn = Cast<APawn>(GetOwner());
+    if (!Pawn)
         return;
 
-    const auto Controller = Player->GetController<APlayerController>();
+    const auto Controller = Pawn->GetController<APlayerController>();
     if (!Controller)
         return;
 
