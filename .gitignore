@@ -36,7 +36,6 @@ Saved/*
 DerivedDataCache/*
 Intermediate/*
 Build/*
-Binaries/
 
 # Debug Database
 *.pdb
